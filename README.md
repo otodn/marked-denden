@@ -1,41 +1,106 @@
-<!-- The character `|` around a string denotes a place in this markdown file that needs to be changed for each extension. -->
-<!-- You may also delete any comments you don't need anymore. -->
-
-# TODO:
-
-- [ ] Replace information in `/README.md`
-- [ ] Replace name in `/rollup.config.js`
-- [ ] Replace information in `/package.json`
-- [ ] Write extension in `/src/index.js`
-- [ ] Write tests in `/spec/index.test.js`
-- [ ] Uncomment release in `/.github/workflows/main.yml`
-
-<!-- Delete this line and above -->
-
-# marked-|this-extension|
+# marked-denden
 <!-- Description -->
+
+## ! WIP !
+marked-denden is a [Marked](https://github.com/markedjs/marked) extension to enable the [DenDenMarkdown](https://github.com/denshoch/DenDenMarkdown) syntax to be used in Marked.js.
+
+Currently only ruby and Horizontal-in-Vertical Text Composition are supported.
 
 # Usage
 <!-- Show most examples of how to use this extension -->
 
 ```js
-import {marked} from "marked";
-import |thisExtension| from "marked-|this-extension|";
+import { marked } from "marked";
+import { dendenMarkdown } from "marked-denden";
 
 // or UMD script
 // <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
 // <script src="https://cdn.jsdelivr.net/npm/marked-|this-extension|/lib/index.umd.js"></script>
 
-const options = {
-	// |default options|
-};
+const dendenOptions = { 
+    rubyParenthesisOpen: "",
+    rubyParenthesisClose: "",
+    autoTcy: true,
+    tcyDigit: 2,
+    autoTextOrientation: true,
+  }
 
-marked.use(|thisExtension|(options));
+// Setting DenDenMarkdown and outputs closer together.
+marked.setOptions({
+        gfm: true,
+        breaks: true,
+        headerIds: false,
+        langPrefix:"",
+        xhtml: true,
+  });
 
-marked.parse("|example markdown|");
-// <p>|example html|</p>
+marked.use(dendenMarkdown(dendenOptions));
+
+marked.parse("{電子出版|でんししゅっぱん}を手軽に");
+// <p><ruby>電子出版<rt>でんししゅっぱん</rt></ruby>を手軽に</p>
+
+marked.parse("2月29日!? ★≠☆");
+// <p>2月<span class="tcy">29</span>日<span class="tcy">!?</span> <span class="upright">★</span><span class="sideways">≠</span><span class="upright">☆</span></p>
 ```
 
 ## `options`
 
-<!-- If there are no options you can delete this section -->
+|option|type|default|description|
+|:----|:----|:----|:----|
+|rubyParenthesisOpen|string| `""` |Opening parentheses for `<rp>`.|
+|rubyParenthesisClose|string| `""` |Closing parentheses for `<rp>`.|
+|autoTcy|boolean|true|Automatic number assignment of Horizontal-in-Vertical Text Composition class to a number.|
+|tcyDigit|number|2|Number of digits to which the Horizontal-in-Vertical Text Composition is automatically assigned.|
+|autoTextOrientation|boolean|true|Add a class that automatically adjusts the orientation of strings for portrait writing.|
+
+## Compatibility of source
+
+Use `denSpace()` to make the source line breaks resemble the original.
+
+```js
+marked.use(dendenMarkdown(dendenOptions));
+marked.parse("Lorem ipsum dolor sit amet, \nconsectetur adipiscing elit, \n\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+
+/* <p>Lorem ipsum dolor sit amet,<br/>consectetur adipiscing elit, </p>
+<p>sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p> */
+
+marked.use(denSpace());
+marked.parse("Lorem ipsum dolor sit amet, \nconsectetur adipiscing elit, \n\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+
+/* <p>Lorem ipsum dolor sit amet,<br/>
+consectetur adipiscing elit, </p>
+
+<p>sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p> */
+```
+
+# TODO
+
+- Footnotes
+- EPUB pagebreak syntax
+- definition list
+
+# Original Copyright and License
+
+DenDenMarkdown
+Copyright (c) 2013 Densho Channel
+http://densho.hatenablog.com/
+All rights reserved.
+
+based on:
+
+PHP Markdown Lib Copyright (c) 2004-2013 Michel Fortin
+http://michelf.ca/
+All rights reserved.
+
+Markdown
+Copyright (c) 2003-2005 John Gruber http://daringfireball.net/ All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+Neither the name "Markdown" nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+This software is provided by the copyright holders and contributors "as is" and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall the copyright owner or contributors be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.

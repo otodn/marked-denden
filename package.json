@@ -1,7 +1,7 @@
 {
-  "name": "marked-extension-template",
-  "version": "0.0.0",
-  "description": "marked extension template",
+  "name": "marked-denden",
+  "version": "0.0.1",
+  "description": "Marked.js extension for DenDenMarkdown",
   "main": "./lib/index.cjs",
   "module": "./src/index.js",
   "browser": "./lib/index.umd.js",
@@ -28,14 +28,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/markedjs/marked-extension-template.git"
+    "url": "git+https://github.com/otodn/marked-denden.git"
   },
-  "author": "Tony Brix <Tony@Brix.ninja> (https://Tony.Brix.ninja)",
+  "author": "otodn",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/markedjs/marked-extension-template/issues"
+    "url": "https://github.com/otodn/marked-denden/issues"
   },
-  "homepage": "https://github.com/markedjs/marked-extension-template#readme",
+  "homepage": "https://github.com/otodn/marked-denden#readme",
   "peerDependencies": {
     "marked": "^4.2.12"
   },
