@@ -4,7 +4,7 @@
 ## ! WIP !
 marked-denden is a [Marked](https://github.com/markedjs/marked) extension to enable the [DenDenMarkdown](https://github.com/denshoch/DenDenMarkdown) syntax to be used in Marked.js.
 
-Currently only ruby and Horizontal-in-Vertical Text Composition are supported.
+Currently only ruby, Horizontal-in-Vertical Text Composition and EPUB pagebreak syntax are supported.
 
 # Usage
 <!-- Show most examples of how to use this extension -->
@@ -15,7 +15,7 @@ import { dendenMarkdown } from "marked-denden";
 
 // or UMD script
 // <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
-// <script src="https://cdn.jsdelivr.net/npm/marked-|this-extension|/lib/index.umd.js"></script>
+// <script src="https://cdn.jsdelivr.net/gh/otodn/marked-denden/src/index.min.js"></script>
 
 const dendenOptions = { 
     rubyParenthesisOpen: "",
@@ -23,6 +23,8 @@ const dendenOptions = {
     autoTcy: true,
     tcyDigit: 2,
     autoTextOrientation: true,
+    epubType: true,
+    dpubRole: true,
   }
 
 // Setting DenDenMarkdown and outputs closer together.
@@ -39,8 +41,8 @@ marked.use(dendenMarkdown(dendenOptions));
 marked.parse("{電子出版|でんししゅっぱん}を手軽に");
 // <p><ruby>電子出版<rt>でんししゅっぱん</rt></ruby>を手軽に</p>
 
-marked.parse("2月29日!? ★≠☆");
-// <p>2月<span class="tcy">29</span>日<span class="tcy">!?</span> <span class="upright">★</span><span class="sideways">≠</span><span class="upright">☆</span></p>
+marked.parse("^ABC^ 2月29日!? ★≠☆");
+// <p><span class="tcy">ABC</span> 2月<span class="tcy">29</span>日<span class="tcy">!?</span> <span class="upright">★</span><span class="sideways">≠</span><span class="upright">☆</span></p>
 ```
 
 ## `options`
@@ -76,8 +78,8 @@ consectetur adipiscing elit, </p>
 # TODO
 
 - Footnotes
-- EPUB pagebreak syntax
 - definition list
+- customID and Class
 
 # Original Copyright and License
 

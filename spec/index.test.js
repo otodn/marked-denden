@@ -9,11 +9,11 @@ Deno.test("DenDenMarkdownOreTest", async (t) => {
     // 改行コードが元ファイルは\r\nだが、markedは\nに変換しているため、\nに置き換えてテストしている
     
     marked.setOptions({
-    gfm: true,
-    breaks: true,
-    headerIds: false,
-    langPrefix:"",
-    xhtml: true
+        gfm: true,
+        breaks: true,
+        headerIds: false,
+        langPrefix:"",
+        xhtml: true
     });
 
     marked.use(dendenMarkdown(), denSpace());
@@ -749,41 +749,49 @@ Deno.test("DenDenMarkdownOreTest", async (t) => {
 
     await t.step("testFootnoteWithoutEpubType", () => {
         const epubType = false;
+        marked.setOptions({denden:{epubType}})
         assertTransformation('footnote-without-epub-type');
     });
 
     await t.step("testPageNumberWithoutEpubType", () => {
         const epubType = false;
+        marked.setOptions({denden:{epubType}})
         assertTransformation('page-number-without-epub-type');
     });
 
     await t.step("testPageNumberTextWithoutEpubType", () => {
         const epubType = false;
+        marked.setOptions({denden:{epubType}})
         assertTransformation('page-number-text-without-epub-type');
     });
 
     await t.step("testPageBreakInlineWithoutEpubType", () => {
         const epubType = false;
+        marked.setOptions({denden:{epubType}})
         assertTransformation('page-break-inline-without-epub-type');
     });
 
     await t.step("testFootnoteWithoutDpubRole", () => {
         const dpubRole = false;
+        marked.setOptions({denden:{dpubRole}})
         assertTransformation('footnote-without-dpub-role');
     });
 
     await t.step("testPageNumberWithoutDpubRole", () => {
         const dpubRole = false;
+        marked.setOptions({denden:{dpubRole}})
         assertTransformation('page-number-without-dpub-role');
     });
 
     await t.step("testPageNumberTextWithoutDpubrole", () => {
         const dpubRole = false;
+        marked.setOptions({denden:{dpubRole}})
         assertTransformation('page-number-text-without-dpub-role');
     });
 
     await t.step("testPageInlineBreakWithoutDpubRole", () => {
         const dpubRole = false;
+        marked.setOptions({denden:{dpubRole}})
         assertTransformation('page-break-inline-without-dpub-role');
     });
 
