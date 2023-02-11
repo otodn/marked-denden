@@ -49,7 +49,7 @@ export function dendenMarkdown(_options = {}) {
     return {
         extensions: [
             {// 改ページ
-                name: 'docbreak',
+                name: 'docBreak',
                 level: 'block',
                 start(src) { return src.indexOf('\n\n'); },
                 tokenizer(src, tokens) {
@@ -66,14 +66,14 @@ export function dendenMarkdown(_options = {}) {
                     return this.parser.options.xhtml ? `<hr class="docbreak"/>\n` : `<hr class="docbreak">\n`;
                 }
             }, {// ページ番号(行)
-                name: 'page_number',
+                name: 'pageNumber',
                 level: 'block',
                 tokenizer(src, tokens) {
                     const rule = /^\[%(%?)(.*)(?<!\])\]\n/;
                     const match = rule.exec(src);
                     if (match) {
                         return {
-                            type: "page_number",
+                            type: "pageNumber",
                             raw: match[0],
                             text: match[2],
                             show: match[1] ? true : false,
@@ -88,9 +88,8 @@ export function dendenMarkdown(_options = {}) {
 
                     return `<div id="pagenum_${token.text}" class="pagenum" title="${token.text}"${epub_tag}${role_tag}>${show_num}</div>\n`;
                 }
-            },
-            {// ページ番号(インライン)
-                name: 'page_number_inline',
+            },{// ページ番号(インライン)
+                name: 'pageNumberInline',
                 level: 'inline',
                 start(src) { return src.indexOf('['); },
                 tokenizer(src, tokens) {
@@ -98,7 +97,7 @@ export function dendenMarkdown(_options = {}) {
                     const match = rule.exec(src);
                     if (match) {
                         return {
-                            type: "page_number_inline",
+                            type: "pageNumberInline",
                             raw: match[0],
                             text: match[2],
                             show: match[1] ? true : false,
@@ -173,7 +172,7 @@ export function dendenMarkdown(_options = {}) {
                 renderer(token) {
                     return `<span class="tcy">${this.parser.parseInline(token.tokens)}</span>`;
                 }
-            }, { // 縦書き調整
+            }, { // 自動縦書き調整
                 name: 'autoAlign',
                 level: 'inline',
                 renderer(token) {
@@ -185,6 +184,7 @@ export function dendenMarkdown(_options = {}) {
             const opt = this.defaults.getDendenOption();
             const { autoTcy, tcyDigit, autoTextOrientation } = opt;
 
+            // 自動縦中横
             if (autoTcy || autoTextOrientation) {
                 // 数字用の縦中横、sideways、upright
                 const makeInSpan = () => {
@@ -218,10 +218,8 @@ export function dendenMarkdown(_options = {}) {
                                 const up_rule = new RegExp(`[${symbol_list}]`, "g");
                                 let side_match = el.text.matchAll(side_rule);
                                 let up_match = el.text.matchAll(up_rule);
+                                const q = [...side_match, ...up_match].map(match => match.index).sort((a, b) => a - b);
 
-                                const side_i = Array.from(side_match, (match) => match.index);
-                                const up_i = Array.from(up_match, (match) => match.index);
-                                const q = side_i.concat(up_i).sort((a, b) => a - b);
                                 if (!q.length) { continue; }
 
                                 const new_txt = splitTextAtIndex(el.text, q);
@@ -271,13 +269,13 @@ export function dendenMarkdown(_options = {}) {
                     }
                 }
             }
+
         },
         getDendenOption() {
-            const opt = {
+            return {
                 ...options,
                 ...this.denden,
-            }
-            return opt;
+            };
         }
     }
 }
@@ -312,16 +310,15 @@ export function denSpace() {
                     return `<h${token.depth} id="${id}">${token.text}</h${token.depth}>${br_n}`;
                   }
               
-                  // ignore IDs
                   return `<h${token.depth}>${token.text}</h${token.depth}>${br_n}`;
             }
         },{
-            name: 'docbreak',
+            name: 'docBreak',
             renderer(token) {
                 return this.parser.options.xhtml ? `<hr class="docbreak"/>` : `<hr class="docbreak">`;
             }
         },{
-            name: 'page_number',
+            name: 'pageNumber',
             renderer(token) {
                 const br_n = token.raw.match(break_reg);
                 const options = this.parser.options.getDendenOption();

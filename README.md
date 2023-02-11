@@ -29,11 +29,11 @@ const dendenOptions = {
 
 // Setting DenDenMarkdown and outputs closer together.
 marked.setOptions({
-        gfm: true,
-        breaks: true,
-        headerIds: false,
-        langPrefix:"",
-        xhtml: true,
+    gfm: true,
+    breaks: true,
+    headerIds: false,
+    langPrefix:"",
+    xhtml: true,
   });
 
 marked.use(dendenMarkdown(dendenOptions));
@@ -54,6 +54,8 @@ marked.parse("^ABC^ 2月29日!? ★≠☆");
 |autoTcy|boolean|true|Automatic number assignment of Horizontal-in-Vertical Text Composition class to a number.|
 |tcyDigit|number|2|Number of digits to which the Horizontal-in-Vertical Text Composition is automatically assigned.|
 |autoTextOrientation|boolean|true|Add a class that automatically adjusts the orientation of strings for portrait writing.|
+|epubType|boolean|true|Add `epub:type="pagebreak"` to page break tags.|
+|dpubRole|boolean|true|Add `role="doc-pagebreak"` to page break tags.|
 
 ## Compatibility of source
 
@@ -77,9 +79,7 @@ consectetur adipiscing elit, </p>
 
 # TODO
 
-- Footnotes
-- definition list
-- customID and Class
+- [ ] Footnotes
 
 # Original Copyright and License
 
