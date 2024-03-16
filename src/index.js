@@ -1,5 +1,4 @@
 export function dendenMarkdown(_options = {}) {
-
     const default_options = {
         rubyParenthesisOpen: "",
         rubyParenthesisClose: "",
@@ -8,6 +7,12 @@ export function dendenMarkdown(_options = {}) {
         autoTextOrientation: true,
         epubType: true,
         dpubRole: true,
+        aozoraRuby: false,
+        footnoteIdPrefix: "",
+        footnoteLinkClass: "noteref",
+        footnoteBacklinkClass: "",
+        footnoteBacklinkContent: "&#9166;",
+        pageNumberClass: "pagenum",
     }
 
     const options = {
@@ -63,9 +68,10 @@ export function dendenMarkdown(_options = {}) {
                     }
                 },
                 renderer(token) {
-                    return this.parser.options.xhtml ? `<hr class="docbreak"/>\n` : `<hr class="docbreak">\n`;
+                    return `<hr class="docbreak">`;
                 }
-            }, {// ページ番号(行)
+            },
+            {// ページ番号(行)
                 name: 'pageNumber',
                 level: 'block',
                 tokenizer(src, tokens) {
@@ -86,9 +92,10 @@ export function dendenMarkdown(_options = {}) {
                     const role_tag = options.dpubRole ? ' role="doc-pagebreak"' : '';
                     const show_num = token.show ? token.text : '';
 
-                    return `<div id="pagenum_${token.text}" class="pagenum" title="${token.text}"${epub_tag}${role_tag}>${show_num}</div>\n`;
+                    return `<div id="pagenum_${token.text}" class="${options.pageNumberClass}" title="${token.text}"${epub_tag}${role_tag}>${show_num}</div>`;
                 }
-            },{// ページ番号(インライン)
+            },
+            {// ページ番号(インライン)
                 name: 'pageNumberInline',
                 level: 'inline',
                 start(src) { return src.indexOf('['); },
@@ -110,7 +117,7 @@ export function dendenMarkdown(_options = {}) {
                     const role_tag = options.dpubRole ? ' role="doc-pagebreak"' : '';
                     const show_num = token.show ? token.text : '';
 
-                    return `<span id="pagenum_${token.text}" class="pagenum" title="${token.text}"${epub_tag}${role_tag}>${show_num}</span>`;
+                    return `<span id="pagenum_${token.text}" class="${options.pageNumberClass}" title="${token.text}"${epub_tag}${role_tag}>${show_num}</span>`;
                 }
             },
             { // ルビ
@@ -153,7 +160,57 @@ export function dendenMarkdown(_options = {}) {
                     }
                     return `<ruby>${this.parser.parseInline(token.tokens)}${rpOpen}<rt>${this.parser.parseInline(token.rt)}</rt>${rpClose}</ruby>`;
                 }
-            }, { // 縦中横
+
+            },
+            { // 脚注拡張機能レンダー上書き
+                name: 'footnotes',
+                renderer({ items = [] }) {
+                    const { footnoteIdPrefix, footnoteBacklinkContent } = options;
+                    const epub_fn_tag = options.epubType ? ' epub:type="footnote"' : '';
+                    const role_fn_tag = options.dpubRole ? ' role="doc-footnote"' : '';
+                    const role_bl_tag = options.dpubRole ? ' role="doc-backlink"' : '';
+                    const fn_bl_class = options.footnoteBacklinkClass ? ` class="${footnoteBacklinkClass}"` : '';
+                    const fn_bl_attr = `${fn_bl_class}${role_bl_tag}`
+                    if (items.length === 0) return "";
+                    const footnotesItemsHTML = items.reduce(
+                        (acc, { label, content, refs }) => {
+                            const encodedLabel = encodeURIComponent(label);
+                            const parsedContent = this.parser.parse(content).trimEnd();
+                            const isEndsWithP = parsedContent.endsWith('</p>');
+                            let footnoteItem = '<li>\n';
+                            footnoteItem += `<div id="fn_${footnoteIdPrefix + encodedLabel}" class="footnote"${epub_fn_tag}${role_fn_tag}>\n`;
+                            footnoteItem += isEndsWithP ? parsedContent.replace(/<\/p>$/, '') : parsedContent;
+                            refs.forEach((_, i) => {
+                                footnoteItem += ` <a href="#fnref_${encodedLabel}"${fn_bl_attr}>${i > 0 ? `${footnoteBacklinkContent}${i + 1}` : `${footnoteBacklinkContent}`}</a>`
+                            })
+                            footnoteItem += isEndsWithP ? '</p>\n' : '\n';
+                            footnoteItem += '</div>\n';
+                            footnoteItem += '</li>\n';
+
+                            return acc + footnoteItem;
+                        }, "" // 初期値
+                    )
+
+                    const epub_fns_tag = options.epubType ? ' epub:type="footnotes"' : '';
+                    let footnotesHTML = `\n<div class="footnotes"${epub_fns_tag}>\n`;
+                    footnotesHTML += '<hr>\n';
+                    footnotesHTML += `<ol>\n\n${footnotesItemsHTML}</ol>\n\n`;
+                    footnotesHTML += '</div>\n';
+                    return footnotesHTML;
+                }
+            },
+            { // 脚注拡張機能レンダー上書き(参照)
+                name: 'footnoteRef',
+                renderer({ id, label }) {
+                    let order = 0;
+                    const epub_fnr_tag = options.epubType ? ' epub:type="noteref"' : '';
+                    const role_fnr_tag = options.dpubRole ? ' role="doc-noteref"' : '';
+                    const fnr_class_tag = options.footnoteLinkClass ? ` class="${options.footnoteLinkClass}"`: '';
+                    const encodedLabel = encodeURIComponent(label);
+                    return `<a id="fnref_${encodedLabel}" href="#fn_${encodedLabel}" rel="footnote"${fnr_class_tag}${epub_fnr_tag}${role_fnr_tag}>${id}</a>`;
+                }
+            },
+            { // 縦中横
                 name: 'tcy',
                 level: 'inline',
                 start(src) { return src.indexOf('^'); },
@@ -172,7 +229,8 @@ export function dendenMarkdown(_options = {}) {
                 renderer(token) {
                     return `<span class="tcy">${this.parser.parseInline(token.tokens)}</span>`;
                 }
-            }, { // 自動縦書き調整
+            },
+            { // 自動縦書き調整
                 name: 'autoAlign',
                 level: 'inline',
                 renderer(token) {
@@ -277,59 +335,5 @@ export function dendenMarkdown(_options = {}) {
                 ...this.denden,
             };
         }
-    }
-}
-
-// ソースに改行(本家のテストを通したい)
-export function denSpace() {
-    const break_reg = /\n+$/;
-    const renderer = {
-        paragraph(text) { return `<p>${text}</p>`; },
-        br() { return this.options.xhtml ? '<br/>\n' : '<br>\n'; },
-    }
-    return {
-        extensions: [{
-            name: 'space',
-            renderer(token) {
-                return token.raw;
-            }
-        },
-        {
-            name: 'hr',
-            renderer(token) {
-                const br_n = token.raw.match(break_reg);
-                return this.parser.options.xhtml ? '<hr/>' + br_n : '<hr>' + br_n;
-            }
-        },{
-            name: 'heading',
-            renderer(token) {
-                const br_n = token.raw.match(break_reg);
-                const escapedText = token.text.toLowerCase().replace(/[^\w]+/g, '-');
-                if (this.parser.options.headerIds) {
-                    const id = this.parser.options.headerPrefix + escapedText;
-                    return `<h${token.depth} id="${id}">${token.text}</h${token.depth}>${br_n}`;
-                  }
-              
-                  return `<h${token.depth}>${token.text}</h${token.depth}>${br_n}`;
-            }
-        },{
-            name: 'docBreak',
-            renderer(token) {
-                return this.parser.options.xhtml ? `<hr class="docbreak"/>` : `<hr class="docbreak">`;
-            }
-        },{
-            name: 'pageNumber',
-            renderer(token) {
-                const br_n = token.raw.match(break_reg);
-                const options = this.parser.options.getDendenOption();
-                const epub_tag = options.epubType ? ' epub:type="pagebreak"' : '';
-                const role_tag = options.dpubRole ? ' role="doc-pagebreak"' : '';
-                const show_num = token.show ? token.text : '';
-                return `<div id="pagenum_${token.text}" class="pagenum" title="${token.text}"${epub_tag}${role_tag}>${show_num}</div>${br_n}`;
-            }
-        },
-
-        ],
-        renderer,
     }
 }

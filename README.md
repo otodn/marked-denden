@@ -4,17 +4,19 @@
 ## ! WIP !
 marked-denden is a [Marked](https://github.com/markedjs/marked) extension to enable the [DenDenMarkdown](https://github.com/denshoch/DenDenMarkdown) syntax to be used in Marked.js.
 
-Currently only ruby, Horizontal-in-Vertical Text Composition and EPUB pagebreak syntax are supported.
+Currently only ruby, Horizontal-in-Vertical Text Composition and EPUB pagebreak syntax, Footnote are supported.
 
 # Usage
 <!-- Show most examples of how to use this extension -->
 
 ```js
 import { marked } from "marked";
+import markedFootnote from 'marked-footnote';
 import { dendenMarkdown } from "marked-denden";
 
 // or UMD script
 // <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+// <script src="https://cdn.jsdelivr.net/npm/marked-footnote/dist/index.umd.min.js"></script>
 // <script src="https://cdn.jsdelivr.net/gh/otodn/marked-denden/src/index.min.js"></script>
 
 const dendenOptions = { 
@@ -31,18 +33,21 @@ const dendenOptions = {
 marked.setOptions({
     gfm: true,
     breaks: true,
-    headerIds: false,
-    langPrefix:"",
-    xhtml: true,
   });
 
-marked.use(dendenMarkdown(dendenOptions));
+// This extension overrides the footnote extension and should not change the order.
+marked.use(markedFootnote())
+marked.use(dendenMarkdown(default_options));
+
+// OR
+// marked.use(markedFootnote(),dendenMarkdown(dendenOptions));
 
 marked.parse("{電子出版|でんししゅっぱん}を手軽に");
 // <p><ruby>電子出版<rt>でんししゅっぱん</rt></ruby>を手軽に</p>
 
 marked.parse("^ABC^ 2月29日!? ★≠☆");
 // <p><span class="tcy">ABC</span> 2月<span class="tcy">29</span>日<span class="tcy">!?</span> <span class="upright">★</span><span class="sideways">≠</span><span class="upright">☆</span></p>
+
 ```
 
 ## `options`
@@ -56,30 +61,11 @@ marked.parse("^ABC^ 2月29日!? ★≠☆");
 |autoTextOrientation|boolean|true|Add a class that automatically adjusts the orientation of strings for portrait writing.|
 |epubType|boolean|true|Add `epub:type="pagebreak"` to page break tags.|
 |dpubRole|boolean|true|Add `role="doc-pagebreak"` to page break tags.|
-
-## Compatibility of source
-
-Use `denSpace()` to make the source line breaks resemble the original.
-
-```js
-marked.use(dendenMarkdown(dendenOptions));
-marked.parse("Lorem ipsum dolor sit amet, \nconsectetur adipiscing elit, \n\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
-
-/* <p>Lorem ipsum dolor sit amet,<br/>consectetur adipiscing elit, </p>
-<p>sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p> */
-
-marked.use(denSpace());
-marked.parse("Lorem ipsum dolor sit amet, \nconsectetur adipiscing elit, \n\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
-
-/* <p>Lorem ipsum dolor sit amet,<br/>
-consectetur adipiscing elit, </p>
-
-<p>sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p> */
-```
+|footnoteBacklinkContent|string| `⏎` | Text linking to the reference source.⏎
 
 # TODO
 
-- [ ] Footnotes
+- [x] Footnotes: Thanks [marked-extensions/packages/footnote](https://github.com/bent10/marked-extensions/tree/main/packages/footnote) !
 
 # Original Copyright and License
 
