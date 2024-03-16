@@ -51,7 +51,13 @@ export function dendenMarkdown(_options = {}) {
         return splitText;
     }
 
+    // スペース反映の相殺分
+    const renderer = {
+        paragraph(text) { return `<p>${text}</p>`; },
+    }
+
     return {
+        renderer,
         extensions: [
             {// 改ページ
                 name: 'docBreak',
@@ -62,13 +68,13 @@ export function dendenMarkdown(_options = {}) {
                     const match = rule.exec(src);
                     if (match) {
                         return {
-                            type: "docbreak",
+                            type: "docBreak",
                             raw: match[0],
                         }
                     }
                 },
-                renderer(token) {
-                    return `<hr class="docbreak">`;
+                renderer(_) {
+                    return `<hr class="docbreak"/>`;
                 }
             },
             {// ページ番号(行)
@@ -92,7 +98,7 @@ export function dendenMarkdown(_options = {}) {
                     const role_tag = options.dpubRole ? ' role="doc-pagebreak"' : '';
                     const show_num = token.show ? token.text : '';
 
-                    return `<div id="pagenum_${token.text}" class="${options.pageNumberClass}" title="${token.text}"${epub_tag}${role_tag}>${show_num}</div>`;
+                    return `<div id="pagenum_${token.text}" class="${options.pageNumberClass}" title="${token.text}"${epub_tag}${role_tag}>${show_num}</div>\n`;
                 }
             },
             {// ページ番号(インライン)
@@ -178,7 +184,7 @@ export function dendenMarkdown(_options = {}) {
                             const parsedContent = this.parser.parse(content).trimEnd();
                             const isEndsWithP = parsedContent.endsWith('</p>');
                             let footnoteItem = '<li>\n';
-                            footnoteItem += `<div id="fn_${footnoteIdPrefix + encodedLabel}" class="footnote"${epub_fn_tag}${role_fn_tag}>\n`;
+                            footnoteItem += `<div id="fn_${footnoteIdPrefix + encodedLabel}" class="footnote"${epub_fn_tag}${role_fn_tag}>`;
                             footnoteItem += isEndsWithP ? parsedContent.replace(/<\/p>$/, '') : parsedContent;
                             refs.forEach((_, i) => {
                                 footnoteItem += ` <a href="#fnref_${encodedLabel}"${fn_bl_attr}>${i > 0 ? `${footnoteBacklinkContent}${i + 1}` : `${footnoteBacklinkContent}`}</a>`
@@ -205,7 +211,7 @@ export function dendenMarkdown(_options = {}) {
                     let order = 0;
                     const epub_fnr_tag = options.epubType ? ' epub:type="noteref"' : '';
                     const role_fnr_tag = options.dpubRole ? ' role="doc-noteref"' : '';
-                    const fnr_class_tag = options.footnoteLinkClass ? ` class="${options.footnoteLinkClass}"`: '';
+                    const fnr_class_tag = options.footnoteLinkClass ? ` class="${options.footnoteLinkClass}"` : '';
                     const encodedLabel = encodeURIComponent(label);
                     return `<a id="fnref_${encodedLabel}" href="#fn_${encodedLabel}" rel="footnote"${fnr_class_tag}${epub_fnr_tag}${role_fnr_tag}>${id}</a>`;
                 }
@@ -235,6 +241,12 @@ export function dendenMarkdown(_options = {}) {
                 level: 'inline',
                 renderer(token) {
                     return `<span class="${token.class}">${this.parser.parseInline(token.tokens)}</span>`;
+                }
+            },
+            { // スペース反映
+                name: 'space',
+                renderer(token) {
+                    return token.raw;
                 }
             },
         ],
@@ -328,6 +340,16 @@ export function dendenMarkdown(_options = {}) {
                 }
             }
 
+        },
+        // 最後にコード整形
+        hooks: {
+            postprocess(html) {
+                const br_reg = /(?<!\n)<br\/?>(?!\n)/g;
+                const hr_reg = /(<hr.*?>)(?!\n)/g;
+                const p__cloce_reg = /(?<!\n)<\/p>(?!\n)/g;
+                let re_html = html.replaceAll(br_reg, "<br/>\n").replaceAll(hr_reg, "$1\n").replaceAll(p__cloce_reg,"</p>\n");
+                return re_html;
+            }
         },
         getDendenOption() {
             return {
