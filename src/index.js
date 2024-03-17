@@ -1,4 +1,4 @@
-export function dendenMarkdown(_options = {}) {
+export default function dendenMarkdown(_options = {}) {
     const default_options = {
         rubyParenthesisOpen: "",
         rubyParenthesisClose: "",
@@ -199,7 +199,7 @@ export function dendenMarkdown(_options = {}) {
 
                     const epub_fns_tag = options.epubType ? ' epub:type="footnotes"' : '';
                     let footnotesHTML = `\n<div class="footnotes"${epub_fns_tag}>\n`;
-                    footnotesHTML += '<hr>\n';
+                    footnotesHTML += '<hr/>\n';
                     footnotesHTML += `<ol>\n\n${footnotesItemsHTML}</ol>\n\n`;
                     footnotesHTML += '</div>\n';
                     return footnotesHTML;

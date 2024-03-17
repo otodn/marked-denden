@@ -12,12 +12,12 @@ Currently only ruby, Horizontal-in-Vertical Text Composition and EPUB pagebreak 
 ```js
 import { marked } from "marked";
 import markedFootnote from 'marked-footnote';
-import { dendenMarkdown } from "marked-denden";
+import dendenMarkdown from "marked-denden";
 
 // or UMD script
 // <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
 // <script src="https://cdn.jsdelivr.net/npm/marked-footnote/dist/index.umd.min.js"></script>
-// <script src="https://cdn.jsdelivr.net/gh/otodn/marked-denden/src/index.min.js"></script>
+// <script src="https://cdn.jsdelivr.net/gh/otodn/marked-denden/src/index.umd.min.js"></script>
 
 const dendenOptions = { 
     rubyParenthesisOpen: "",
